@@ -8,9 +8,8 @@
 
     <IsPackable>false</IsPackable>
     <OutputType>Library</OutputType>
-    <AssemblyName>poc-nunit</AssemblyName>
+    <AssemblyName>NUnitBasicFeatures</AssemblyName>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
     <PackageReference Include="NUnit" Version="3.13.3" />
