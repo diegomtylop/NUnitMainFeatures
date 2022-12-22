@@ -33,8 +33,9 @@ https://automationintesting.online/
 https://restful-booker.herokuapp.com/apidoc/index.html
 
 
-## Running the test by console
+## Running the test by console
 
+The tests can be executed by console using the following commands
 
 ### Run all tests
 `dotnet test`
@@ -49,4 +50,5 @@ https://restful-booker.herokuapp.com/apidoc/index.html
 
 ## Generating reports
 (Requires *NunitXml.TestLogger* dependency)
-` dotnet test --test-adapter-path:. --logger:nunit`
+
+`dotnet test --test-adapter-path:. --logger:nunit`
