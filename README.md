@@ -4,7 +4,7 @@ Repository to practice the main features of NUnit framework
 Some of the Tests are based on the exercises proposed on this course: https://testautomationu.applitools.com/nunit-tutorial
 
 ## Course repository
-The mentioned course has a repository which was used as base for the current repo, was not forked because the idea was to implement all the classes by hand.
+The mentioned course has a repository which was used as base for the current repo, It was not forked because the idea was to implement all the classes by hand.
 https://github.com/brendanconnolly/TestingWithNUnit
 
 
