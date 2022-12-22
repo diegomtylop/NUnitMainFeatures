@@ -10,20 +10,20 @@ https://github.com/brendanconnolly/TestingWithNUnit
 
 ## Project Structure
 
-* **RestfulBooker.Api**: Library that contains the classes to call the RestfulBooker API
-* **RestfulBooker.UI**: Library that contains the page objects and needed components to interact with the RestfulBooker application using Selenium
+* **RestfulBooker.Api**: Library that contains the classes to call the RestfulBooker API, implemented mainly using the `RestSharp` library
+* **RestfulBooker.UI**: Library that contains the page objects and needed components to interact with the RestfulBooker application using `Selenium
 * **TestingWithNUnit.Tests**: Contains some of the exercises proposes on the mentioned course with some minor modifications
-  * NUnitCore:
+  * **NUnitCore:**
     * Examples of the Basic features that NUnit provides `[Test]`, `[Setup]`, `[TearDown]`, Assertions, Assumptions.
     * Includes examples of DataDriven testing attributes like `[Values]`, `[Pairwise]`, `[Sequential]`, `[Range]`, `[TestCase]`, ` [ValueSource]`, `[TestCaseSource]`
     * Also examples of additional or optional attributes like `[Description]`, `[Category]`, `[Order]`, `[Platform]`, `[Explicit]`, `[Ignore]`
     * It also has an example of how to load test data from a JSON file
     * TestContext and TestResults
     * Parallel execution
-  * Api:
+  * **Api:**
     * Contains API tests using the *RestfulBooker.Api* Library
-  * UI
-    * Contains UI tests using the * RestfulBooker.UI* Library
+  * **UI**
+    * Contains UI tests using the *RestfulBooker.UI* Library
 
 ## Application under test
 
