@@ -11,7 +11,7 @@ https://github.com/brendanconnolly/TestingWithNUnit
 ## Project Structure
 
 * **RestfulBooker.Api**: Library that contains the classes to call the RestfulBooker API, implemented mainly using the `RestSharp` library
-* **RestfulBooker.UI**: Library that contains the page objects and needed components to interact with the RestfulBooker application using `Selenium
+* **RestfulBooker.UI**: Library that contains the page objects and needed components to interact with the RestfulBooker application using `Selenium`
 * **TestingWithNUnit.Tests**: Contains some of the exercises proposes on the mentioned course with some minor modifications
   * **NUnitCore:**
     * Examples of the Basic features that NUnit provides `[Test]`, `[Setup]`, `[TearDown]`, Assertions, Assumptions.
