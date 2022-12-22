@@ -1,4 +1,4 @@
-﻿namespace TestingWithNUnit.Tests;
+﻿namespace TestingWithNUnit.Tests.NUnitCore;
 
 public class BasicFeatures
 {

@@ -2,7 +2,7 @@
 using RestfulBooker.UI.Data;
 using TestingWithNUnit.Tests.Data;
 
-namespace TestingWithNUnit.Tests
+namespace TestingWithNUnit.Tests.NUnitCore
 {
 	public class DataDriveTests
 	{

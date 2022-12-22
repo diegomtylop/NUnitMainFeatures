@@ -1,5 +1,5 @@
 ﻿using System;
-namespace TestingWithNUnit.Tests
+namespace TestingWithNUnit.Tests.NUnitCore
 {
     //Test class to see in action different attributes available on NUnit
     //Based on https://testautomationu.applitools.com/nunit-tutorial/chapter6.html
@@ -91,6 +91,45 @@ namespace TestingWithNUnit.Tests
         public void AlwaysIgnored()
         {
             Console.WriteLine("This can be manually run, but it will be skipped when running the complete suite");
+        }
+
+        [Test]
+        [Category("parallel")]
+        [Parallelizable]
+        public void ParallelizableOne()
+        {
+            Console.WriteLine("Test that can be run in parallel");
+            for ( var i = 0; i < 5; i++)
+            {
+                Thread.Sleep(1000);
+                TestContext.Progress.WriteLine("Running Parallel 1");
+            }
+        }
+
+        [Test]
+        [Category("parallel")]
+        [Parallelizable]
+        public void ParallelizableTwo()
+        {
+            Console.WriteLine("Test that can be run in parallel");
+            for (var i = 0; i < 10; i++)
+            {
+                Thread.Sleep(500);
+                TestContext.Progress.WriteLine("Running Parallel 2");
+            }
+        }
+
+        [Test]
+        [Category("parallel")]
+        [Parallelizable]
+        public void ParallelizableThree()
+        {
+            Console.WriteLine("Test that can be run in parallel");
+            for (var i = 0; i < 20; i++)
+            {
+                Thread.Sleep(300);
+                TestContext.Progress.WriteLine("Running Parallel 3");
+            }
         }
     }
 }
