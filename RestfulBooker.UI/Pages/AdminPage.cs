@@ -6,6 +6,7 @@ using RestfulBooker.UI.Data;
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace RestfulBooker.UI.Pages
 {
@@ -51,6 +52,9 @@ namespace RestfulBooker.UI.Pages
         private By checkHasRefreshLocator = By.Id("refreshCheckbox");
         private By checkHasSafeLocator = By.Id("safeCheckbox");
         private By checkHasViewsLocator = By.Id("viewsCheckbox");
+
+        //Error
+        private By errorMessageLocator = By.CssSelector(".alert-danger");
 
 
 
@@ -102,21 +106,19 @@ namespace RestfulBooker.UI.Pages
             driver.FindElement(checkHasSafeLocator).SetCheckBoxDiego(room.HasSafe);
             driver.FindElement(checkHasViewsLocator).SetCheckBoxDiego(room.HasView);
 
-
-            //Btn to create the room
+            //Press the button to create the room
             driver.FindElement(btnCreateRoomLocator).Click();
 
-
-            //Wait until the room is added to the list
-            var newRow = wait.Until(drv => drv.FindElement(By.Id("roomName" + room.Number)) );
-			Console.WriteLine("Newly added room: " + newRow.Text);
+            //todo: improve this
+            Thread.Sleep(500);
         }
 
-		public int RoomCount()
+
+        public int RoomCount()
 		{
             //TODO: IT FAILS IF THE LIST IS EMPTY
-			//Wait until the list is loaded
-			wait.Until(drv => drv.FindElements(roomListLocator).Count > 0);
+            //Wait until the list is loaded
+            wait.Until(drv => drv.FindElements(roomListLocator).Count > 0);
 			return driver.FindElements(roomListLocator).Count;
 		}
 
@@ -127,6 +129,18 @@ namespace RestfulBooker.UI.Pages
             btnList.Last().Click();
             //todo: improve this
             Thread.Sleep(1000);
+        }
+
+        public bool IsErrorDisplayed()
+        {
+            return driver.FindElements(errorMessageLocator).Count > 0;
+        }
+
+        public string[] GetErrorMessages()
+        {
+            var messageContainer = wait.Until(drv => drv.FindElement(errorMessageLocator) );
+            var messages = messageContainer.Text;
+            return messages.Split("\n");
         }
     }
 }

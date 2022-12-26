@@ -22,28 +22,17 @@ namespace TestingWithNUnit.Tests.UI
             adminPage.Login("admin", "password");
         }
 
-		[Test(Description ="Test the option to add new rooms",Author ="Diego Montoya")]
-        [Category("ui")]
-        public void AddRoom()
-		{
-			Console.WriteLine("Running the first UI test");
-
-			int initialCounter = adminPage.RoomCount();
-            Console.WriteLine("Initial counter: "+initialCounter);
-
-			Random r = new Random();
-			int randomId = r.Next(100, 300);
-            int randomPrice = r.Next(100, 200);
-			bool randomAccessible = r.Next(10) % 2 == 0;
-			var typesArray = RoomType.GetValues<RoomType>();
-			RoomType randomType = typesArray[ r.Next( typesArray.Length) ];
-
+        [Test(Description = "Test the required fields")]
+        public void NotEmptyRoom(
+            [Values] RoomType randomType
+        )
+        {
             Room toAdd = new Room()
-			{
-				Number = randomId.ToString(),
-				Type = randomType,
-				Accessible = randomAccessible,
-				Price = randomPrice.ToString(),
+            {
+                Number = "",
+                Type = randomType,
+                Accessible = true,
+                Price = "",
                 HasWiFi = randomBoolean(),
                 HasTelevision = randomBoolean(),
                 HasRadio = randomBoolean(),
@@ -52,14 +41,59 @@ namespace TestingWithNUnit.Tests.UI
                 HasView = randomBoolean()
             };
 
-			adminPage.AddRoom(toAdd);
+            adminPage.AddRoom(toAdd);
+
+            Assert.True(adminPage.IsErrorDisplayed(),"Error message not displayed");
+
+            var messages = adminPage.GetErrorMessages();
+            Assert.That( messages, Is.Not.Empty);
+            Assert.Contains("Room name must be set", messages);
+            Assert.That(messages, Has.One.EqualTo("Room name must be set"));
+            Assert.That(messages, Has.One.EqualTo("must be greater than or equal to 1"));
+        }
+
+
+        [Test(Description = "Test the option to add new rooms", Author = "Diego Montoya")]
+        [Category("ui")]
+        [Pairwise]
+        //[Ignore("meanwhile")]
+        public void AddRoom(
+            [Values] RoomType randomType,
+            [Values] bool randomAccessible,
+            [Values] bool hasWiFi
+        )
+        {
+            Console.WriteLine("Running the first UI test");
+
+            int initialCounter = adminPage.RoomCount();
+            Console.WriteLine("Initial counter: " + initialCounter);
+
+            Random r = new Random();
+            int randomId = r.Next(100, 300);
+            int randomPrice = r.Next(100, 200);
+            //var typesArray = RoomType.GetValues<RoomType>();
+
+            Room toAdd = new Room()
+            {
+                Number = randomId.ToString(),
+                Type = randomType,
+                Accessible = randomAccessible,
+                Price = randomPrice.ToString(),
+                HasWiFi = hasWiFi,
+                HasTelevision = randomBoolean(),
+                HasRadio = randomBoolean(),
+                HasRefreshments = randomBoolean(),
+                HasSafe = randomBoolean(),
+                HasView = randomBoolean()
+            };
+
+            adminPage.AddRoom(toAdd);
 
             int updatedCounter = adminPage.RoomCount();
             Console.WriteLine("updatedCounter: " + updatedCounter);
 
             Assert.That(initialCounter, Is.LessThan(updatedCounter));
-            Assert.That(updatedCounter, Is.EqualTo(initialCounter+1));
-
+            Assert.That(updatedCounter, Is.EqualTo(initialCounter + 1));
         }
 
         [Test]
