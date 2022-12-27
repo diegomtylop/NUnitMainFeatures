@@ -30,12 +30,14 @@
     <None Remove="NunitXml.TestLogger" />
     <None Remove="NUnitCore\" />
     <None Remove="FluentAssertions" />
+    <None Remove="UI\Data\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Api\" />
     <Folder Include="UI\" />
     <Folder Include="Data\" />
     <Folder Include="NUnitCore\" />
+    <Folder Include="UI\Data\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RestfulBooker.Api\RestfulBooker.Api.csproj" />
