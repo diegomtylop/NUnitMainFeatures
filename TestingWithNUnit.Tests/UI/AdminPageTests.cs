@@ -1,17 +1,13 @@
 ﻿using System;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using WebDriverManager;
-using WebDriverManager.DriverConfigs.Impl;
-
 using RestfulBooker.UI.Pages;
 using RestfulBooker.UI.Data;
+using TestingWithNUnit.Tests.UI.Data;
 
 namespace TestingWithNUnit.Tests.UI
 {
 	public class AdminPageTests:UiTest
 	{
-		
 		private AdminPage adminPage;
 
 		[OneTimeSetUp]
@@ -23,25 +19,13 @@ namespace TestingWithNUnit.Tests.UI
         }
 
         [Test(Description = "Test the required fields")]
-        public void NotEmptyRoom(
-            [Values] RoomType randomType
+        public async Task NotEmptyRoom(
+            [Values] RoomType roomType
         )
         {
-            Room toAdd = new Room()
-            {
-                Number = "",
-                Type = randomType,
-                Accessible = true,
-                Price = "",
-                HasWiFi = randomBoolean(),
-                HasTelevision = randomBoolean(),
-                HasRadio = randomBoolean(),
-                HasRefreshments = randomBoolean(),
-                HasSafe = randomBoolean(),
-                HasView = randomBoolean()
-            };
+            Room toAdd = RoomsFactory.GenerateRoomData(id:"",price:"");
 
-            adminPage.AddRoom(toAdd);
+            await adminPage.AddRoom(toAdd);
 
             Assert.True(adminPage.IsErrorDisplayed(),"Error message not displayed");
 
@@ -52,45 +36,70 @@ namespace TestingWithNUnit.Tests.UI
             Assert.That(messages, Has.One.EqualTo("must be greater than or equal to 1"));
         }
 
-
         [Test(Description = "Test the option to add new rooms", Author = "Diego Montoya")]
         [Category("ui")]
         [Pairwise]
-        //[Ignore("meanwhile")]
-        public void AddRoom(
-            [Values] RoomType randomType,
-            [Values] bool randomAccessible,
-            [Values] bool hasWiFi
+        public async Task AddRoom(
+            [Values] RoomType roomType,
+            [Values] bool roomAccessible
         )
         {
-            Console.WriteLine("Running the first UI test");
+            TestContext.Progress.WriteLine("-----------------------------");
+            TestContext.Progress.WriteLine("\nAdd Room test room type: {0}, accessible: {1}",roomType, roomAccessible);
 
             int initialCounter = adminPage.RoomCount();
-            Console.WriteLine("Initial counter: " + initialCounter);
+            Console.WriteLine("Initial counter: {0}", initialCounter);
 
-            Random r = new Random();
-            int randomId = r.Next(100, 300);
-            int randomPrice = r.Next(100, 200);
-            //var typesArray = RoomType.GetValues<RoomType>();
+            var toAdd = RoomsFactory.GenerateRoomData(
+                roomType:roomType,
+                isAccessible:roomAccessible
+            );
 
-            Room toAdd = new Room()
-            {
-                Number = randomId.ToString(),
-                Type = randomType,
-                Accessible = randomAccessible,
-                Price = randomPrice.ToString(),
-                HasWiFi = hasWiFi,
-                HasTelevision = randomBoolean(),
-                HasRadio = randomBoolean(),
-                HasRefreshments = randomBoolean(),
-                HasSafe = randomBoolean(),
-                HasView = randomBoolean()
-            };
-
-            adminPage.AddRoom(toAdd);
+            await adminPage.AddRoom(toAdd);
 
             int updatedCounter = adminPage.RoomCount();
-            Console.WriteLine("updatedCounter: " + updatedCounter);
+            Console.WriteLine("updatedCounter: {0}", updatedCounter);
+
+            Assert.That(initialCounter, Is.LessThan(updatedCounter));
+            Assert.That(updatedCounter, Is.EqualTo(initialCounter + 1));
+        }
+
+        /**
+        Note: For some reason when calling the AddRoom method
+        with the interceptRequests=true multiple times
+        is making the application crash. that's why this method only includes a single
+        call to the method with this argument in true
+        */
+        [Category("ui")]
+        [TestCase(true, false, false, TestName = "Listen to DOM changes")]
+        [TestCase(false, true, false, TestName = "Intersept network requests")]
+        [TestCase(false, false, true, TestName = "With slow connections")]
+        public async Task AddRoomWithListeners(
+            bool listenDomMutation,
+            bool intersectNetwork,
+            bool slowConnection
+        )
+        {
+            TestContext.Progress.WriteLine("-----------------------------");
+            TestContext.Progress.WriteLine("\nAdd Room listenDomMutation: {0}, intersectNetworkrequests: {1}, simulate slow connections: {2}",
+                listenDomMutation,
+                intersectNetwork,
+                slowConnection
+            );
+
+            int initialCounter = adminPage.RoomCount();
+            Console.WriteLine("Initial counter: {0}", initialCounter);
+
+            var toAdd = RoomsFactory.GenerateRoomData();
+
+            await adminPage.AddRoom(toAdd,
+                interceptRequests: intersectNetwork,
+                listenForDomMutation: listenDomMutation,
+                simulateSlowConnection: slowConnection
+            );
+
+            int updatedCounter = adminPage.RoomCount();
+            Console.WriteLine("updatedCounter: {0}", updatedCounter);
 
             Assert.That(initialCounter, Is.LessThan(updatedCounter));
             Assert.That(updatedCounter, Is.EqualTo(initialCounter + 1));
@@ -104,21 +113,15 @@ namespace TestingWithNUnit.Tests.UI
             Console.WriteLine("Deleting a room");
 
             int initialCounter = adminPage.RoomCount();
-            Console.WriteLine("Initial counter: " + initialCounter);
+            Console.WriteLine("Initial counter: {0}", initialCounter);
 
             adminPage.RemoveLastRoom();
 
             int updatedCounter = adminPage.RoomCount();
-            Console.WriteLine("updatedCounter: " + updatedCounter);
+            Console.WriteLine("updatedCounter: {0}", updatedCounter);
 
             Assert.That(initialCounter, Is.GreaterThan(updatedCounter));
             Assert.That(updatedCounter, Is.EqualTo(initialCounter - 1));
-        }
-
-        private bool randomBoolean()
-        {
-            Random r = new Random();
-            return r.Next(10) % 2 == 0;
         }
     }
 }

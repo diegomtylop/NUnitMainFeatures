@@ -7,45 +7,32 @@ using RestfulBooker.UI.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace RestfulBooker.UI.Pages
 {
-	public class AdminPage
-	{
-		private readonly IWebDriver driver;
-		private readonly string adminUrl = "https://automationintesting.online/#/admin";
-
-		WebDriverWait wait;
+	public class AdminPage: GeneralPage
+	{	
 
         //TODO: SEE IF C# HAS SOMETHING SIMILAR TO PAGE FACTORY
         private By usernameLocator = By.CssSelector("#username");
-        
         private By passwordLocator = By.CssSelector("#password");
-
         private By loginBtnLocator = By.CssSelector("#doLogin");
-
 		private By frontPageLinkLocator = By.CssSelector("#frontPageLink");
 
-
-		//LIST OF AVAILABLE ROOMS
+		//List of available rooms
 		private By roomListLocator = By.CssSelector("div[data-testid=\"roomlisting\"]");
 
         //Buttons to delete
         private By btnDeleteRoomLocator = By.CssSelector(".roomDelete");
 
-
-        //ADD NEW ROOM
+        //Add new room
         private By roomNameLocator = By.CssSelector("#roomName");
-
 		private By roomTypeLocator = By.CssSelector("#type");
-
         private By roomAccessibleLocator = By.CssSelector("#accessible");
-
         private By roomPriceLocator = By.CssSelector("#roomPrice");
-
         private By btnCreateRoomLocator = By.CssSelector("#createRoom");
-
-
+        //Checkboxes
         private By checkHasWiFiLocator = By.Id("wifiCheckbox");
         private By checkHasTVLocator = By.Id("tvCheckbox");
         private By checkHasRadioLocator = By.Id("radioCheckbox");
@@ -56,20 +43,22 @@ namespace RestfulBooker.UI.Pages
         //Error
         private By errorMessageLocator = By.CssSelector(".alert-danger");
 
-
-
-        public AdminPage(IWebDriver driver)
+        public AdminPage(IWebDriver driver):base(driver)
 		{
-			this.driver = driver;
-			driver.Navigate().GoToUrl(adminUrl);
-
-			wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-				
-			//wait.IgnoreExceptionTypes( typeof(NoSuchElementException) );
-            //wait.IgnoreExceptionTypes( typeof(StaleElementReferenceException) );
+			driver.Navigate().GoToUrl(this.Url);
         }
 
-		public void Login( string username="username", string password="password")
+        //Abreviated
+        //public override string Url => "https://automationintesting.online/#/admin";
+        public override string Url
+        {
+            get
+            {
+                return "https://automationintesting.online/#/admin";
+            }
+        }
+
+        public void Login( string username="username", string password="password")
 		{
 			var usernameInput = driver.FindElement(usernameLocator);
 			usernameInput.SendKeys(username);
@@ -80,18 +69,27 @@ namespace RestfulBooker.UI.Pages
 
 
             //Wait until the form is loaded
-            wait.Until(drv => drv.FindElement(btnCreateRoomLocator));
+            wait.Until(drv => drv.FindElements(btnCreateRoomLocator).Count > 0);
             var frontPageLink = wait.Until(drv => drv.FindElement(frontPageLinkLocator));
 
 			Console.WriteLine("Text of the link: "+ frontPageLink.Text);
         }
 
-		public void AddRoom( Room room)
-		{
-			driver.FindElement(roomNameLocator).SendKeys(room.Number);
+        public async Task AddRoom(Room room,
+            bool simulateSlowConnection = false,
+            bool interceptRequests = false,
+            bool listenForDomMutation = false
+            )
+        {
+            if (simulateSlowConnection)
+            {
+                SetSlowConnection();
+            }
 
-			new SelectElement(driver.FindElement(roomTypeLocator))
-				.SelectByValue(room.Type.ToString() );
+            driver.FindElement(roomNameLocator).SendKeys(room.Number);
+
+            new SelectElement(driver.FindElement(roomTypeLocator))
+                .SelectByValue(room.Type.ToString());
 
             new SelectElement(driver.FindElement(roomAccessibleLocator))
                 .SelectByValue(room.Accessible.ToString().ToLowerInvariant());
@@ -106,18 +104,50 @@ namespace RestfulBooker.UI.Pages
             driver.FindElement(checkHasSafeLocator).SetCheckBoxDiego(room.HasSafe);
             driver.FindElement(checkHasViewsLocator).SetCheckBoxDiego(room.HasView);
 
+            //Count the current number of rooms
+            int roomsCount = this.RoomCount();
+
+            //ADD THE HANDLER
+            if( interceptRequests )
+                await InterceptNetworkRequest("/room", "POST");
+
+            //DOM MUTATION
+            if( listenForDomMutation )
+                await EnableMutationListener();
+
             //Press the button to create the room
             driver.FindElement(btnCreateRoomLocator).Click();
 
-            //todo: improve this
-            Thread.Sleep(500);
-        }
+            Console.WriteLine("Create button pressed");
 
+            if( interceptRequests )
+                waitUntilApiResponds();
+
+            //Wait
+            if (listenForDomMutation)
+                waitUntiDomMutates();
+
+            //WORKING WAIT
+            wait.Until(drv =>
+                RoomCount() == roomsCount + 1 ||
+                drv.FindElements(errorMessageLocator).Count > 0
+            );
+
+            //Disable the mutation
+            if (listenForDomMutation)
+                await DisableMutationListener();
+            //Stop the Request interception
+            if (interceptRequests)
+                await StopInterceptingRequests();
+
+            if (simulateSlowConnection) {
+                ResetConnectionSpeed();
+            }
+        }
 
         public int RoomCount()
 		{
-            //TODO: IT FAILS IF THE LIST IS EMPTY
-            //Wait until the list is loaded
+            //Wait until the page is loaded
             wait.Until(drv => drv.FindElements(roomListLocator).Count > 0);
 			return driver.FindElements(roomListLocator).Count;
 		}
@@ -125,10 +155,16 @@ namespace RestfulBooker.UI.Pages
         //Method to remove the last room
         public void RemoveLastRoom()
         {
+            //Count the current number of rooms
+            int roomsCount = this.RoomCount();
+
             var btnList = driver.FindElements(btnDeleteRoomLocator);
             btnList.Last().Click();
-            //todo: improve this
-            Thread.Sleep(1000);
+
+            //Wait until the row is removed
+            wait.Until(drv =>
+                RoomCount() == roomsCount - 1
+            );
         }
 
         public bool IsErrorDisplayed()

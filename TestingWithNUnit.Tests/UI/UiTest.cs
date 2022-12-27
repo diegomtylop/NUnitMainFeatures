@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using RestfulBooker.UI.Pages;
@@ -16,15 +17,16 @@ namespace TestingWithNUnit.Tests.UI
         [OneTimeSetUp]
         public void setupBrowser()
         {
-            Console.WriteLine("Creating the new webdriver session");
+            TestContext.Progress.WriteLine("Creating the new webdriver session");
             new DriverManager().SetUpDriver(new ChromeConfig());
-            driver = new ChromeDriver();  
+            driver = new ChromeDriver();
         }
 
         [OneTimeTearDown]
         public void quitDriver()
         {
-            Console.WriteLine("Quitting the webdriver");
+            TestContext.Progress.WriteLine("Quitting the webdriver");
+
             if (driver != null)
             {
                 driver.Quit();
